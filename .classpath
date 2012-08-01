@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="lib" path="/home/sohesado/workspace/jstyx-0.2.0-unix/lib/commons-logging-1.0.4.jar"/>
+	<classpathentry kind="lib" path="/home/sohesado/workspace/jstyx-0.2.0-unix/lib/dom4j-1.6.jar"/>
+	<classpathentry kind="lib" path="/home/sohesado/workspace/jstyx-0.2.0-unix/lib/jaxen-1.1-beta-5.jar"/>
+	<classpathentry kind="lib" path="/home/sohesado/workspace/jstyx-0.2.0-unix/lib/JSAP-2.0b.jar"/>
+	<classpathentry kind="lib" path="/home/sohesado/workspace/jstyx-0.2.0-unix/lib/log4j-1.2.8.jar"/>
+	<classpathentry kind="lib" path="/home/sohesado/workspace/jstyx-0.2.0-unix/lib/mina-0.8.0.jar"/>
+	<classpathentry kind="lib" path="/home/sohesado/workspace/jstyx-0.2.0-unix/lib/quartz-1.5.1.jar"/>
+	<classpathentry kind="lib" path="/home/sohesado/workspace/jstyx-0.2.0-unix/lib/slf4j-log4j12-1.0-beta9.jar"/>
+	<classpathentry kind="lib" path="/home/sohesado/workspace/jstyx-0.2.0-unix/lib/TableLayout.jar"/>
+	<classpathentry kind="lib" path="/home/sohesado/workspace/jstyx-0.2.0-unix/jstyx-0.2.0.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
