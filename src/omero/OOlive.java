@@ -9,22 +9,31 @@ import uk.ac.rdg.resc.jstyx.client.StyxConnection;
 
 public class OOlive {
 
-	static final private byte[] handshakeData = {0x15, 0x0, 0x0, 0x0, 0x2, 0x5, 0x0, 0x0, 0x0, 0x2f, 0x6d,
-										0x61, 0x69, 0x6e, 0x3, 0x0, 0x0, 0x0, 0x74, 0x6f, 0x70};
-
 	public OOlive(CStyxFile oliveFD) {
+		OMeropCtl top = new OMeropCtl("/main", "top");
+		byte[] td = new byte[top.packedsize()];
+		top.pack().get(td);
 		try {
 			oliveFD.open(StyxUtils.ORDWR | StyxUtils.OTRUNC);
-			oliveFD.writeAll(handshakeData, handshakeData.length);
+			oliveFD.writeAll(td, td.length);
 			for (;;) {
 				ByteBuffer bf = oliveFD.read(0);
-				System.out.println(bf.toString());
+				if (bf.get(bf.position() + 4) == OMeropUpdate.type) {
+					OMeropUpdate u = new OMeropUpdate(bf);
+					System.err.println(u.toString());
+				} else if (bf.get(bf.position() + 4) == OMeropCtl.type) {
+					OMeropCtl c = new OMeropCtl(bf);
+					System.err.println(c.toString());
+				} else {
+					System.err.println("unkown type");
+				}
 			}
 		} catch (StyxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+
 	public static void main(String[] args) {
 		try {
 			StyxConnection conn = new StyxConnection("127.0.0.1", 4987);

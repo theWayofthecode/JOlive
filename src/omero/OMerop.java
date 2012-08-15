@@ -1,5 +1,6 @@
 package omero;
 
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 
 import org.apache.mina.common.ByteBuffer;
@@ -21,7 +22,34 @@ public abstract class OMerop {
 		this();
 		this.path = new String(path);
 	}
+	
+	protected String gstring(ByteBuffer b) {
+		
+		int strsize = b.getInt();
+		if (strsize == NODATA)
+			return null;
+		
+		String str = null;
+		try {
+			str = b.getString(strsize, utf8charset.newDecoder());
+		} catch (CharacterCodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+		return str;
+	}
+
+	protected void pstring(ByteBuffer d, String s) {
+		d.putInt(s.length());
+		try {
+			d.putString(s, utf8charset.newEncoder());
+		} catch (CharacterCodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	protected abstract int packedsize();
 	public abstract ByteBuffer pack();
+	public abstract int unpack(ByteBuffer f);
 }
