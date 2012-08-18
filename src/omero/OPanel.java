@@ -9,9 +9,10 @@ import uk.ac.rdg.resc.jstyx.client.*;
 import uk.ac.rdg.resc.jstyx.*;
 
 public class OPanel {
+	protected CStyxFile panelFd;
+
 	private int id = -1;
 	private String name;
-	private CStyxFile panelFd;	
 	private CStyxFile cFd;
 	private CStyxFile dFd;
 	

@@ -5,7 +5,6 @@ package omero;
 import org.apache.mina.common.ByteBuffer;
 
 public class OMeropUpdate extends OMerop {
-	public static final byte type = 1;
 	public int vers;
 	public String ctls;
 	public byte[] data;
@@ -13,6 +12,7 @@ public class OMeropUpdate extends OMerop {
 
 	public OMeropUpdate() {
 		super();
+		type = UPDATETYPE;
 	}
 	
 	public OMeropUpdate(ByteBuffer f) {
@@ -42,7 +42,8 @@ public class OMeropUpdate extends OMerop {
 		}
 		
 		//type
-		if (type != f.get()) {
+		type = f.get();
+		if (type != UPDATETYPE) {
 			System.err.println("Wrong merop type (Not Update)");
 			return 0;
 		}
@@ -63,9 +64,10 @@ public class OMeropUpdate extends OMerop {
 	}
 	
 	public String toString() {
-		return (new String(path + "\n" +
-							vers + "\n" +
-							ctls + "\n" +
-							edits + "\n"));
+		return (new String("path: " + path + "\n" +
+							"type: " + type + "\n" +
+							"vers: " + vers + "\n" +
+							"ctls: " + ctls + "\n" +
+							"edits: " + edits + "\n"));
 	}
 }

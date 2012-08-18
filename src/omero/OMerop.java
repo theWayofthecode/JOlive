@@ -11,11 +11,17 @@ public abstract class OMerop {
 	protected final int NODATA = ~0;
 	protected final int HDRSZ = BIT32SZ+BIT8SZ;	
 	protected Charset utf8charset;
-	public String path;
+
+	public static final byte UPDATETYPE = 1;
+	public static final byte CTLTYPE = 2;
 	
+	public String path;
+	public byte type;
+
 	public OMerop() {
 		utf8charset = Charset.forName("UTF-8");
 		path = null;
+		type = -1;
 	}
 
 	public OMerop(String path) {
@@ -52,4 +58,8 @@ public abstract class OMerop {
 	protected abstract int packedsize();
 	public abstract ByteBuffer pack();
 	public abstract int unpack(ByteBuffer f);
+	
+	public String toString() {
+		return path;
+	}
 }

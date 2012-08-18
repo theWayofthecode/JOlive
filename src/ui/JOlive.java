@@ -9,6 +9,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import omero.OOlive;
+
 import uk.ac.rdg.resc.jstyx.StyxException;
 import uk.ac.rdg.resc.jstyx.client.CStyxFile;
 import uk.ac.rdg.resc.jstyx.client.StyxConnection;
@@ -18,6 +20,9 @@ import uk.ac.rdg.resc.jstyx.client.StyxConnection;
 public class JOlive  extends JFrame {
 
 	public JOlive(String ip, int port) {
+		JPanel rootP = null;
+		OOlive oo = null;
+		
     	setTitle("JOlive");
     	setSize(800, 600);
     	setLocationRelativeTo(null);
@@ -27,28 +32,20 @@ public class JOlive  extends JFrame {
 			StyxConnection conn = new StyxConnection(ip, port);
 			conn.connect();		
 			CStyxFile root = conn.getRootDirectory();
-			JPanel rootP = new JPanel();
-			initUItree(root.getFile("main"), rootP);
-			getContentPane().add(rootP);
+			oo = new OOlive(root.getFile("olive"));
+			rootP = new JPanel();
+			JOPanel.createUITree(root.getFile("main"), rootP);
+
 		} catch (StyxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-	}
-	
-	private void initUItree(CStyxFile cf, JComponent parComp) throws StyxException {
-		assert(parComp != null);
-    	for (CStyxFile f: cf.getChildren()) {
-    		if (f.isDirectory()) {
-        		JOPanel jop = new JOPanel(f, parComp);
-    			initUItree(f, jop.getComponent());
-    		}
-    	}
+		getContentPane().add(rootP);
+		setVisible(true);
+		oo.run();
 	}
 
 	public static void main(String args[]) {
 		JOlive jo = new JOlive("127.0.0.1", 4987);
-		jo.setVisible(true);
 	}
 }

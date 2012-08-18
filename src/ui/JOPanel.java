@@ -7,6 +7,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.StringTokenizer;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -22,24 +23,41 @@ import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
 
 import omero.OAttrs;
+import omero.OMerop;
+import omero.OMeropCtl;
+import omero.OMeropUpdate;
+import omero.OOlive;
 import omero.OPanel;
+import uk.ac.rdg.resc.jstyx.StyxException;
 import uk.ac.rdg.resc.jstyx.client.CStyxFile;
 
-public class JOPanel extends OPanel implements ActionListener, ItemListener{
+public class JOPanel extends OPanel implements ActionListener, ItemListener {
 	private JComponent swingComp;	
 	private String sel;
 	private String text;
 	
+	
+	public static void createUITree(CStyxFile cf, JComponent parComp) throws StyxException {
+		assert(parComp != null);
+    	for (CStyxFile f: cf.getChildren()) {
+    		if (f.isDirectory()) {
+        		JOPanel jop = new JOPanel(f, parComp);
+    			createUITree(f, jop.getComponent());
+    		}
+    	}
+	}
+
 	public JOPanel(CStyxFile sf, JComponent parentComp) {
 		super(sf);
-		System.out.println(getName());
 		initComponent();
 		parentComp.add(this.swingComp);
+		
+		OOlive.panelRegistry.put(panelFd.getPath(), this);
+		System.err.println("Registered as " + panelFd.getPath());
 	}
 	
 	private void initComponent() {
 		String type = getType();
-		System.out.println("type " + type);
 
 		if ("col".equals(type)) {
 			swingComp = new JPanel();
@@ -130,6 +148,38 @@ public class JOPanel extends OPanel implements ActionListener, ItemListener{
         return popupListener;
     }
 	
+	public void omeroListener(OMerop e) {
+		if (e.type == OMerop.UPDATETYPE) {
+			try {
+				omeroListenerUpdate((OMeropUpdate)e);
+			} catch (StyxException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		} else if (e.type == OMerop.CTLTYPE) {
+			System.err.println("omeroListener" + ((OMeropCtl)e).toString());
+		}
+	}
+	
+	private void omeroListenerUpdate(OMeropUpdate e) throws StyxException {
+		System.err.println("Update:");
+		System.err.println(e.toString());
+		StringTokenizer parser = new StringTokenizer(e.ctls);
+
+		String s = parser.nextToken();
+		if ("order".equals(s)) {
+			while (parser.hasMoreTokens()) {
+				s = parser.nextToken();
+				CStyxFile f = panelFd.getFile(s);
+				if (!OOlive.panelRegistry.containsKey(f.getPath())) {
+					createUITree(f, swingComp);
+					swingComp.validate();
+				}
+			}
+		}
+		
+	}
+
 	public JComponent getComponent() {
 		return swingComp;
 	}

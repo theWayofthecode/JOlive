@@ -5,7 +5,6 @@ import java.nio.ByteOrder;
 import org.apache.mina.common.ByteBuffer;
 
 public class OMeropCtl extends OMerop {
-	public static final byte type = 2;
 	public String ctl;
 
 	public OMeropCtl(ByteBuffer b) {
@@ -14,6 +13,7 @@ public class OMeropCtl extends OMerop {
 	}
 	public OMeropCtl(String path, String ctl) {
 		super(path);
+		type = CTLTYPE;
 		this.ctl = new String( ctl);
 	}
 	@Override
@@ -44,13 +44,14 @@ public class OMeropCtl extends OMerop {
 		//message packed size
 		int size = f.getInt();
 		if (size > f.capacity()) {
-			System.err.println("size > capacity in Update");
+			System.err.println("size > capacity in Ctl");
 			return 0;
 		}
 		
 		//type
-		if (type != f.get()) {
-			System.err.println("Wrong merop type (Not Update)");
+		type = f.get();
+		if (type != CTLTYPE) {
+			System.err.println("Wrong merop type (Not Ctl)");
 			return 0;
 		}
 		
@@ -69,7 +70,8 @@ public class OMeropCtl extends OMerop {
 	}
 	
 	public String toString() {
-		return (new String(path + "\n" +
-							ctl + "\n"));
+		return (new String("path: " + path + "\n" +
+							"type: " + type + "\n" +
+							"ctl: " + ctl + "\n"));
 	}
 }
