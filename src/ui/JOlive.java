@@ -20,7 +20,7 @@ import uk.ac.rdg.resc.jstyx.client.StyxConnection;
 public class JOlive  extends JFrame {
 
 	public JOlive(String ip, int port) {
-		JPanel rootP = null;
+		JPanel rootp = null;
 		OOlive oo = null;
 		
     	setTitle("JOlive");
@@ -33,14 +33,15 @@ public class JOlive  extends JFrame {
 			conn.connect();		
 			CStyxFile root = conn.getRootDirectory();
 			oo = new OOlive(root.getFile("olive"));
-			rootP = new JPanel();
-			JOPanel.createUITree(root.getFile("main"), rootP);
-
+			rootp = new JPanel();
+			CStyxFile main = root.getFile("main");
+			JOPanel jp = new JOPanel(main, rootp);
+			jp.createUITree(main, rootp);
 		} catch (StyxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		getContentPane().add(rootP);
+		getContentPane().add(rootp);
 		setVisible(true);
 		oo.run();
 	}
