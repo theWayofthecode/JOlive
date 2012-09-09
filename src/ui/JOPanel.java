@@ -1,6 +1,8 @@
 package ui;
 
+import java.awt.Color;
 import java.awt.Container;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -10,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.StringTokenizer;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -33,6 +36,9 @@ import uk.ac.rdg.resc.jstyx.StyxException;
 import uk.ac.rdg.resc.jstyx.client.CStyxFile;
 
 public class JOPanel extends OPanel implements ActionListener, ItemListener {
+	/*TODO:
+	 * Check if mouse listener can move to a seperate class
+	 */
 	private JComponent swingComp;	
 	private String sel;
 	private String text;
@@ -74,6 +80,9 @@ public class JOPanel extends OPanel implements ActionListener, ItemListener {
 		parent.getParent().validate();
 	}
 
+	/*TODO:
+	 * break this function to subfunctions
+	 */
 	private void initComponent() {
 		String type = getType();
 		OAttrs attr = getAttrs();
@@ -81,9 +90,11 @@ public class JOPanel extends OPanel implements ActionListener, ItemListener {
 		if ("col".equals(type) || attr.col) {
 			swingComp = new JPanel();
 			swingComp.setLayout(new BoxLayout(swingComp, BoxLayout.Y_AXIS));
+			swingComp.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		} else if ("row".equals(type) || attr.row) {
 			swingComp = new JPanel();
 			swingComp.setLayout(new BoxLayout(swingComp, BoxLayout.X_AXIS));
+			swingComp.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		} else if ("text".equals(type)) {
 			JTextArea jta = new JTextArea(getData());
 			jta.addMouseListener(createPopupMenu());
@@ -104,7 +115,21 @@ public class JOPanel extends OPanel implements ActionListener, ItemListener {
 			JTextArea jta = new JTextArea(getData());
 			jta.addMouseListener(createPopupMenu());
 			swingComp = jta;
+		} else if ("draw".equals(type)) {
+			JDrawPanel jdp = new JDrawPanel(getData());
+			swingComp = jdp;
 		}
+		
+		if (attr.font == 'B') {
+			modifyFont(Font.BOLD);
+		} else if (attr.font == 'I') {
+			modifyFont(Font.ITALIC);
+		} else if (attr.tag == true) {
+			JLabel tag = new JLabel(new ImageIcon(getClass().getResource("/resources/tag.png")));
+			tag.addMouseListener(createPopupMenu());
+			swingComp.add(tag);
+		}
+
 		swingComp.addNotify();
 	}
 		
@@ -188,31 +213,36 @@ public class JOPanel extends OPanel implements ActionListener, ItemListener {
 		System.err.println(e.toString());
 		StringTokenizer parser = new StringTokenizer(e.ctl);
 		String s = parser.nextToken();
-		try {
-			if ("close".equals(s)) {
-				omeroListenerCtlClose();
-			}
-		} catch (StyxException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+
+		if ("close".equals(s)) {
+			removeUITree(panelFd);
+		} else if ("focus".equals(s)) {
+			omeroListenerCtlFocus();
 		}
-	}
-	
-	private void omeroListenerCtlClose() throws StyxException {
-		removeUITree(panelFd);
+
 	}
 
 	private void omeroListenerUpdate(OMeropUpdate e) throws StyxException {
 		System.err.println("Update:");
 		System.err.println(e.toString());
-		if (e.ctls == null)
-			return;
 
-		StringTokenizer parser = new StringTokenizer(e.ctls);
-		String s = parser.nextToken();
-		if ("order".equals(s)) {
-			omeroListenerUpdateOrder(parser);
-		}	
+		if (e.ctls == null) {
+			if ("draw".equals(getType())) {
+				omeroListenerUpdateDraw();
+			}
+		} else {
+			StringTokenizer parser = new StringTokenizer(e.ctls);
+			String s = parser.nextToken();
+			if ("order".equals(s)) {
+				omeroListenerUpdateOrder(parser);
+			} else if ("font".equals(s)) {
+				omeroListenerUpdateFont(parser);
+			} else if ("hide".equals(s)) {
+				swingComp.setVisible(false);
+			} else if ("show".equals(s)) {
+				swingComp.setVisible(true);
+			}
+		}
 	}
 
 	private void omeroListenerUpdateOrder(StringTokenizer order) throws StyxException {
@@ -226,10 +256,42 @@ public class JOPanel extends OPanel implements ActionListener, ItemListener {
 		}
 	}
 	
+	private void omeroListenerUpdateFont(StringTokenizer font) {
+		String type = font.nextToken();
+		System.err.println("type" + type);
+
+		if ("B".equals(type)) {
+			modifyFont(Font.BOLD);
+		} else if ("I".equals(type)) {
+			modifyFont(Font.ITALIC);
+		}
+	}
+
+	private void omeroListenerUpdateDraw() {
+		JDrawPanel jdp = (JDrawPanel)swingComp;
+		jdp.instructions = getData().split("\n");
+		jdp.updateUI();
+	}
+
+	private void omeroListenerCtlFocus() {
+		swingComp.grabFocus();
+	}
 	public JComponent getComponent() {
 		return swingComp;
 	}
-	
+
+	private void modifyFont(int style) {
+		JTextComponent t;
+		try {
+			t = (JTextComponent)this.swingComp;
+		} catch (ClassCastException e) {
+			System.err.println(e.getMessage());
+			return;
+		}
+		Font f = t.getFont();
+		t.setFont(new Font(f.getName(), style, f.getSize()));
+	}
+
 	class PopupListener extends MouseAdapter {
 		JPopupMenu popup;
 
@@ -246,11 +308,15 @@ public class JOPanel extends OPanel implements ActionListener, ItemListener {
 		}
 
 		private void maybeShowPopup(MouseEvent e) {
-			JTextComponent tc = (JTextComponent) e.getComponent();
-			sel = tc.getSelectedText();
-			text = tc.getText();
+			String type = getType();
+			if ("text".equals(type) || "label".equals(type)
+					|| "tag".equals(type) || "tbl".equals(type)) {
+				JTextComponent tc = (JTextComponent) e.getComponent();
+				sel = tc.getSelectedText();
+				text = tc.getText();
+			}
 			if (e.isPopupTrigger()) {
-				popup.show(tc, e.getX(), e.getY());
+				popup.show(swingComp, e.getX(), e.getY());
 			}
 		}
 	}

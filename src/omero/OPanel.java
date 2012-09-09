@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+
+import org.apache.mina.common.ByteBuffer;
 
 import uk.ac.rdg.resc.jstyx.client.*;
 import uk.ac.rdg.resc.jstyx.*;
@@ -89,17 +93,12 @@ public class OPanel {
 		
 		try {
 			dFd.open(StyxUtils.OREAD | StyxUtils.ORCLOSE);
-			File dataFile = new File(name);
-			dFd.download(dataFile);			
-			byte[] dataRaw = new byte[(int)dataFile.length()];
-			(new FileInputStream(dataFile)).read(dataRaw);
-			data = new String(dataRaw);
+			ByteBuffer buf = dFd.read(0);
+			CharsetDecoder charDec = Charset.forName("UTF-8").newDecoder();
+			data = buf.getString(charDec);
 			dFd.close();
 		} catch (StyxException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			System.err.println("Data downloaded file not found");
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

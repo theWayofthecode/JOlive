@@ -46,6 +46,7 @@ public class OOlive extends Thread {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			System.err.println(bf.toString());
 			
 			OMerop e = null;
 			if (bf.get(bf.position() + 4) == OMerop.UPDATETYPE) {
@@ -56,7 +57,7 @@ public class OOlive extends Thread {
 				System.err.println("unkown type");
 			}
 			
-//			System.err.println("OOlive received:" + e.toString());
+			System.err.println("OOlive received:" + e.toString());
 			JOPanel jp = panelRegistry.get(e.path);
 			if (jp != null) {
 				System.err.println("Calling omeroListener...");
