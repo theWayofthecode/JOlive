@@ -10,6 +10,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.nio.charset.Charset;
 import java.util.StringTokenizer;
 
 import javax.swing.BorderFactory;
@@ -119,12 +120,11 @@ public class JOPanel extends OPanel implements ActionListener, ItemListener {
 			JDrawPanel jdp = new JDrawPanel(getData());
 			swingComp = jdp;
 		}
+				
+		omeroListenerUpdateFont(Character.toString(attr.font));
 		
-		if (attr.font == 'B') {
-			modifyFont(Font.BOLD);
-		} else if (attr.font == 'I') {
-			modifyFont(Font.ITALIC);
-		} else if (attr.tag == true) {
+		//add tag to widget if necessary
+		if (attr.tag == true) {
 			JLabel tag = new JLabel(new ImageIcon(getClass().getResource("/resources/tag.png")));
 			tag.addMouseListener(createPopupMenu());
 			swingComp.add(tag);
@@ -148,6 +148,8 @@ public class JOPanel extends OPanel implements ActionListener, ItemListener {
 				setData(text);
 			} else if("Close".equals(selected)) {
 				ctl("exec Close");
+			} else if("Open".equals(selected)) {
+				ctl("exec Open " + sel);
 			}
 		} else if ("javax.swing.JButton".equals(className)) {
 			JButton source = (JButton)(e.getSource());
@@ -236,7 +238,7 @@ public class JOPanel extends OPanel implements ActionListener, ItemListener {
 			if ("order".equals(s)) {
 				omeroListenerUpdateOrder(parser);
 			} else if ("font".equals(s)) {
-				omeroListenerUpdateFont(parser);
+				omeroListenerUpdateFont(parser.nextToken());
 			} else if ("hide".equals(s)) {
 				swingComp.setVisible(false);
 			} else if ("show".equals(s)) {
@@ -256,10 +258,7 @@ public class JOPanel extends OPanel implements ActionListener, ItemListener {
 		}
 	}
 	
-	private void omeroListenerUpdateFont(StringTokenizer font) {
-		String type = font.nextToken();
-		System.err.println("type" + type);
-
+	private void omeroListenerUpdateFont(String type) {
 		if ("B".equals(type)) {
 			modifyFont(Font.BOLD);
 		} else if ("I".equals(type)) {
@@ -276,6 +275,7 @@ public class JOPanel extends OPanel implements ActionListener, ItemListener {
 	private void omeroListenerCtlFocus() {
 		swingComp.grabFocus();
 	}
+	
 	public JComponent getComponent() {
 		return swingComp;
 	}

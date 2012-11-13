@@ -47,6 +47,13 @@ public class JOlive  extends JFrame {
 	}
 
 	public static void main(String args[]) {
-		JOlive jo = new JOlive("127.0.0.1", 4987);
+		String ip;
+		int port = 4987;
+		if (args.length > 0) {
+			ip = args[0];
+		} else {
+			ip = "127.0.0.1";
+		}
+		JOlive jo = new JOlive(ip, port);
 	}
 }
